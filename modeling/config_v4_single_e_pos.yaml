@@ -1,0 +1,153 @@
+data:
+  path: data/data_model_ready.nc
+  output_dir: outputs/config_v4_single_e_pos
+  input_window: 7
+  mode_window: 7
+  horizon: 1
+  output_horizon: 1
+  train_end: SET_TRAIN_END
+  val_end: SET_VAL_END
+  batch_size: 256
+  num_workers: 0
+  max_points: null
+  external_et_targets:
+    enabled: true
+    source_name: GLEAM_v4.3a
+    total_et:
+      var: E
+      path: data/et_total.nc
+    vegetation_transpiration:
+      var: Et
+      path: data/et_transpiration.nc
+  static_land_features:
+    enabled: true
+    source_name: ERA5-Land static
+    source_dir: data/static
+    variables:
+    - name: cvh
+      var: cvh
+      path: data/static/cvh.nc
+    - name: cvl
+      var: cvl
+      path: data/static/cvl.nc
+    - name: slt
+      var: slt
+      path: data/static/slt.nc
+    - name: tvh
+      var: tvh
+      path: data/static/tvh.nc
+    - name: tvl
+      var: tvl
+      path: data/static/tvl.nc
+variables:
+  atm_total:
+  - AODANA
+  - ceres_all_sky_sw_down
+  - t2m
+  - u10
+  - v10
+  - blh
+  - r
+  - sp
+  - tp
+  - wind_speed_10m
+  - aod_advection
+  - aod_local_contrast
+  land_total:
+  - stl1
+  - skt
+  - sshf_wm2
+  - slhf_wm2
+  - cvh
+  - cvl
+  - slt
+  - tvh
+  - tvl
+  atm_anom:
+  - t2m_anom15d
+  - t2m_anom30d
+  - ceres_all_sky_sw_down_anom15d
+  - ceres_all_sky_sw_down_anom30d
+  land_anom:
+  - sshf_wm2_anom15d
+  - sshf_wm2_anom30d
+  - slhf_wm2_anom15d
+  - slhf_wm2_anom30d
+  main_targets:
+  - e_pos
+  aux_targets:
+  - ceres_all_sky_sw_down
+  - sshf_wm2
+  - slhf_wm2
+model:
+  backbone: process_token_gated_decoders
+  raw_residual_mode: sequence
+  hidden_dim: 128
+  token_dim: 128
+  encoder_layers: 2
+  domain_transformer_layers: 1
+  decoder_layers: 2
+  lstm_layers: 1
+  dropout: 0.1
+  attention_heads: 4
+  main_head_groups:
+  - - e_pos
+  main_head_raw_variables: null
+  process_token_groups:
+    aod:
+    - AODANA
+    - aod_advection
+    - aod_local_contrast
+    meteo:
+    - t2m
+    - t2m_anom15d
+    - t2m_anom30d
+    - u10
+    - v10
+    - wind_speed_10m
+    - blh
+    - r
+    - sp
+    - tp
+    thermodynamic_energy:
+    - ceres_all_sky_sw_down
+    - ceres_all_sky_sw_down_anom15d
+    - ceres_all_sky_sw_down_anom30d
+    - sshf_wm2
+    - sshf_wm2_anom15d
+    - sshf_wm2_anom30d
+    - slhf_wm2
+    - slhf_wm2_anom15d
+    - slhf_wm2_anom30d
+    soil_thermal:
+    - stl1
+    - skt
+    land_static:
+    - cvh
+    - cvl
+    - slt
+    - tvh
+    - tvl
+  forcing_process_tokens:
+  - aod
+  - meteo
+  - thermodynamic_energy
+  land_process_tokens:
+  - soil_thermal
+  - thermodynamic_energy
+  - land_static
+training:
+  epochs: 20
+  learning_rate: 0.0005
+  weight_decay: 1.0e-05
+  main_loss_mode: head_weighted
+  main_loss_priority_target: null
+  main_loss_priority_rho: 1.0
+  main_head_loss_weights:
+  - 1.0
+  aux_loss_weight: 0.2
+  component_constraint_weight: 0.0
+  val_interval: 5
+  patience: 5
+  grad_clip_norm: 1.0
+  device: auto

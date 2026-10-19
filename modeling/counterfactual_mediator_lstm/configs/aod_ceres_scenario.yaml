@@ -1,0 +1,13 @@
+scenario_name: SET_SCENARIO_NAME
+
+variables:
+  AODANA:
+    enabled: true
+    mode: multiply
+    value: SET_AOD_RATIO
+
+  ceres_all_sky_sw_down:
+    enabled: true
+    mode: add_scaled_delta_from
+    source_variable: AODANA
+    value: SET_CERES_CHANGE_PER_AOD_CHANGE
